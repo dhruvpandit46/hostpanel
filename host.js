@@ -29,170 +29,171 @@ const firebaseConfig = {
   measurementId: "G-PKHZF7JCVH",
 };
 
-// ✅ Init
+// ✅ Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
 // 🎥 Create New Playlist
 window.createPlaylist = async () => {
-  const nameInput = document.getElementById("playlistName");
-  const name = nameInput.value.trim().toLowerCase();
-  if (!name) return alert("Enter playlist name.");
+  const input = document.getElementById("playlistName");
+  const name = input.value.trim().toLowerCase();
+  if (!name) return alert("Please enter a playlist name.");
 
   const refDoc = doc(db, "playlists", name);
-  const docSnap = await getDoc(refDoc);
-  if (docSnap.exists()) {
+  const exists = await getDoc(refDoc);
+  if (exists.exists()) {
     alert("Playlist already exists.");
     return;
   }
 
   await setDoc(refDoc, { videos: [] });
-  alert("Playlist created.");
-  nameInput.value = "";
-  await refreshPlaylists();
+  alert("✅ Playlist created!");
+  input.value = "";
+  refreshPlaylists();
 };
 
-// 📤 Upload Video
+// 📤 Upload Video to Playlist
 window.uploadVideo = async () => {
   const fileInput = document.getElementById("videoFile");
   const titleInput = document.getElementById("videoTitle");
   const playlist = document.getElementById("playlistSelect").value;
+
   const file = fileInput.files[0];
   const title = titleInput.value.trim();
 
   if (!file || !title || !playlist) {
-    alert("Fill all fields.");
+    alert("Please complete all fields.");
     return;
   }
 
   const validTypes = ["video/mp4", "video/webm"];
   if (!validTypes.includes(file.type)) {
-    alert("Only MP4 or WebM video files are allowed.");
+    alert("Only MP4 or WebM files are supported.");
     return;
   }
 
-  const uniqueName = `${Date.now()}_${Math.floor(Math.random() * 10000)}_${file.name.slice(-40)}`;
+  const uniqueName = `${Date.now()}_${Math.floor(Math.random() * 9999)}_${file.name.slice(-40)}`;
   const storageRef = ref(storage, `videos/${uniqueName}`);
   const uploadTask = uploadBytesResumable(storageRef, file);
 
   uploadTask.on(
     "state_changed",
-    (snapshot) => {
-      const percent = Math.floor((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-      console.log(`Uploading: ${percent}%`);
+    (snap) => {
+      const progress = Math.floor((snap.bytesTransferred / snap.totalBytes) * 100);
+      console.log(`📶 Uploading: ${progress}%`);
     },
-    (error) => {
-      console.error("Upload failed:", error);
+    (err) => {
+      console.error("❌ Upload error:", err);
       alert("Upload failed.");
     },
     async () => {
-      const videoURL = await getDownloadURL(uploadTask.snapshot.ref);
+      const url = await getDownloadURL(uploadTask.snapshot.ref);
 
       const refDoc = doc(db, "playlists", playlist);
-      const docSnap = await getDoc(refDoc);
-      const data = docSnap.data();
+      const snap = await getDoc(refDoc);
+      const data = snap.data();
       const videos = data.videos || [];
 
-      videos.push({ title, url: videoURL, path: `videos/${uniqueName}` });
+      videos.push({ title, url, path: `videos/${uniqueName}` });
       await updateDoc(refDoc, { videos });
 
-      alert("Video uploaded.");
+      alert("✅ Video uploaded!");
       fileInput.value = "";
       titleInput.value = "";
-      await refreshPlaylists();
+      refreshPlaylists();
     }
   );
 };
 
-// 🔁 Refresh Playlist UI
+// 🔁 Refresh Playlist View
 async function refreshPlaylists() {
   const select = document.getElementById("playlistSelect");
   const manager = document.getElementById("playlistManager");
+  const prev = select.value;
 
-  const previousSelection = select.value;
-  select.innerHTML = '<option value="">-- Select Playlist --</option>';
+  select.innerHTML = `<option value="">-- Select Playlist --</option>`;
   manager.innerHTML = "";
 
   const snap = await getDocs(collection(db, "playlists"));
-  const names = [];
+  const available = [];
 
   for (const docSnap of snap.docs) {
     const name = docSnap.id;
-    names.push(name);
-    const data = docSnap.data();
-    const videos = data.videos || [];
+    available.push(name);
+    const { videos = [] } = docSnap.data();
 
     const opt = document.createElement("option");
     opt.value = name;
     opt.textContent = name;
     select.appendChild(opt);
 
-    const div = document.createElement("div");
-    div.className = "playlist-block";
-    div.innerHTML = `<h3>${name}</h3>`;
+    const block = document.createElement("div");
+    block.className = "playlist-block";
+    block.innerHTML = `<h3>${name}</h3>`;
 
-    videos.forEach((vid, index) => {
-      const safeID = `title-${encodeURIComponent(name)}-${index}`;
-      const vDiv = document.createElement("div");
-      vDiv.className = "video-item";
-      vDiv.innerHTML = `
+    videos.forEach((vid, i) => {
+      const id = `title-${encodeURIComponent(name)}-${i}`;
+      const item = document.createElement("div");
+      item.className = "video-item";
+      item.innerHTML = `
         <video src="${vid.url}" controls width="250"></video>
-        <input type="text" value="${vid.title}" id="${safeID}" />
+        <input type="text" value="${vid.title}" id="${id}" />
         <div class="video-controls">
-          <button onclick="saveEdit('${name}', ${index})">💾 Save</button>
-          <button onclick="deleteVideo('${name}', ${index})">🗑 Delete</button>
+          <button onclick="saveEdit('${name}', ${i})">💾 Save</button>
+          <button onclick="deleteVideo('${name}', ${i})">🗑 Delete</button>
         </div>
       `;
-      div.appendChild(vDiv);
+      block.appendChild(item);
     });
 
-    manager.appendChild(div);
+    manager.appendChild(block);
   }
 
-  if (previousSelection && names.includes(previousSelection)) {
-    select.value = previousSelection;
+  if (available.includes(prev)) {
+    select.value = prev;
   }
 }
 
-// 💾 Edit Title
+// 💾 Save Edited Title
 window.saveEdit = async (playlist, index) => {
   const input = document.getElementById(`title-${encodeURIComponent(playlist)}-${index}`);
   const newTitle = input.value.trim();
   if (!newTitle) return alert("Title cannot be empty.");
 
   const refDoc = doc(db, "playlists", playlist);
-  const docSnap = await getDoc(refDoc);
-  const data = docSnap.data();
+  const snap = await getDoc(refDoc);
+  const data = snap.data();
   const videos = data.videos || [];
 
   videos[index].title = newTitle;
   await updateDoc(refDoc, { videos });
 
-  alert("Title updated.");
+  alert("✅ Title updated!");
 };
 
-// ❌ Delete Video
+// ❌ Delete a Video
 window.deleteVideo = async (playlist, index) => {
-  if (!confirm("Delete this video?")) return;
+  if (!confirm("Are you sure you want to delete this video?")) return;
 
   const refDoc = doc(db, "playlists", playlist);
-  const docSnap = await getDoc(refDoc);
-  const data = docSnap.data();
+  const snap = await getDoc(refDoc);
+  const data = snap.data();
   const videos = data.videos || [];
 
-  const videoPath = videos[index]?.path;
-  if (videoPath) {
-    const storageRef = ref(storage, videoPath);
-    await deleteObject(storageRef).catch((err) =>
-      console.warn("Warning: Video deleted from Firestore, but file not found in storage.")
+  const filePath = videos[index]?.path;
+  if (filePath) {
+    const refFile = ref(storage, filePath);
+    await deleteObject(refFile).catch(() =>
+      console.warn("⚠️ File may have already been deleted from storage.")
     );
   }
 
   videos.splice(index, 1);
   await updateDoc(refDoc, { videos });
 
-  await refreshPlaylists();
+  alert("🗑 Video deleted.");
+  refreshPlaylists();
 };
 
 // 🚀 Init
