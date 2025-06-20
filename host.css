@@ -7,13 +7,24 @@ body {
   line-height: 1.6;
 }
 
+/* 🧠 Container Wrapper */
+.black-block {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #111;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+}
+
+/* 🧩 Header */
 header {
   background: #111;
   padding: 1.2rem 2rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
 .logo {
@@ -23,13 +34,11 @@ header {
   text-shadow: 0 0 10px #00d8ff;
 }
 
+/* 📄 Main Sections */
 main {
-  padding: 2rem;
-  max-width: 900px;
-  margin: auto;
+  padding: 2rem 0;
 }
 
-/* ✍️ Form & Sections */
 section {
   background: #1e1e1e;
   padding: 1.5rem;
@@ -44,6 +53,7 @@ h2 {
   margin-bottom: 1rem;
 }
 
+/* ✍️ Form Inputs */
 input,
 select {
   display: block;
@@ -57,16 +67,16 @@ select {
   border-radius: 6px;
   margin-bottom: 1rem;
   outline: none;
-  transition: 0.2s;
+  transition: 0.2s ease-in-out;
 }
 
 input:focus,
 select:focus {
   border-color: #00d8ff;
-  box-shadow: 0 0 6px rgba(0,216,255,0.4);
+  box-shadow: 0 0 6px rgba(0, 216, 255, 0.4);
 }
 
-/* 🎯 Button Design */
+/* 🎯 Buttons */
 button {
   background: linear-gradient(90deg, #00d8ff, #007a99);
   color: #000;
@@ -85,13 +95,13 @@ button:hover {
   box-shadow: 0 0 16px rgba(0, 216, 255, 0.6);
 }
 
-/* 🎥 Playlist Management */
+/* 🎥 Playlist Display */
 .playlist-block {
   background: #2a2a2a;
   padding: 1rem;
   margin-bottom: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 0 6px rgba(0,216,255,0.1);
+  box-shadow: 0 0 6px rgba(0, 216, 255, 0.1);
 }
 
 .playlist-block h3 {
@@ -101,12 +111,13 @@ button:hover {
   text-transform: capitalize;
 }
 
+/* 📺 Video Item Card */
 .video-item {
   background: #000;
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
-  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
 .video-item video {
@@ -116,15 +127,35 @@ button:hover {
   margin-bottom: 0.5rem;
 }
 
-.video-item input {
+.video-item input[type="text"] {
   background: #222;
   color: #fff;
   border: 1px solid #444;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  width: 100%;
 }
 
+/* 🎛 Controls for Each Video */
 .video-controls {
   margin-top: 0.75rem;
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+/* 📱 Responsive Tweaks */
+@media (max-width: 600px) {
+  .logo {
+    font-size: 1.4rem;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  .video-item video {
+    max-width: 100%;
+  }
 }
