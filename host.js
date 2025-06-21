@@ -17,13 +17,13 @@ import {
   deleteObject,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-// ✅ Firebase Config
+// ✅ Firebase Config (🔥 Using firebasestorage.app bucket as requested)
 const firebaseConfig = {
   apiKey: "AIzaSyCLRpi50-Tn0JVUqowd3wR11hg9XZ1zCQc",
   authDomain: "anique-dialer.firebaseapp.com",
   databaseURL: "https://anique-dialer-default-rtdb.firebaseio.com",
   projectId: "anique-dialer",
-  storageBucket: "anique-dialer.appspot.com",
+  storageBucket: "anique-dialer.firebasestorage.app", // ✅ Custom bucket override
   messagingSenderId: "105864685118",
   appId: "1:105864685118:web:2d32f8a0fc47ff77d8136f",
   measurementId: "G-PKHZF7JCVH",
@@ -101,7 +101,7 @@ window.uploadVideo = async () => {
         title,
         url,
         path: `videos/${uniqueName}`,
-        ...(isRestricted ? { restricted: true } : {}) // ✅ Add only if checked
+        ...(isRestricted ? { restricted: true } : {})
       };
 
       videos.push(newVideo);
