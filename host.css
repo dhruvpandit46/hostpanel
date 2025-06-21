@@ -76,6 +76,25 @@ select:focus {
   box-shadow: 0 0 6px rgba(0, 216, 255, 0.4);
 }
 
+/* 🔞 Restricted Checkbox */
+label[for="restrictedCheckbox"],
+#restrictedCheckbox {
+  cursor: pointer;
+}
+
+#restrictedCheckbox {
+  margin-right: 8px;
+  transform: scale(1.2);
+}
+
+label {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: #eee;
+}
+
 /* 🎯 Buttons */
 button {
   background: linear-gradient(90deg, #00d8ff, #007a99);
