@@ -17,22 +17,22 @@ import {
   deleteObject,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-// ✅ Firebase Config (Fixed bucket name)
+// ✅ Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyCLRpi50-Tn0JVUqowd3wR11hg9XZ1zCQc",
   authDomain: "anique-dialer.firebaseapp.com",
   databaseURL: "https://anique-dialer-default-rtdb.firebaseio.com",
   projectId: "anique-dialer",
-  storageBucket: "anique-dialer.firebasestorage.app", // ✅ CORRECT bucket
+  storageBucket: "anique-dialer.appspot.com",
   messagingSenderId: "105864685118",
   appId: "1:105864685118:web:2d32f8a0fc47ff77d8136f",
   measurementId: "G-PKHZF7JCVH",
 };
 
-// ✅ Initialize Firebase and Storage
+// ✅ Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const storage = getStorage(app, "gs://anique-dialer.firebasestorage.app"); // ✅ Explicitly correct
+const storage = getStorage(app);
 
 // 🎥 Create New Playlist
 window.createPlaylist = async () => {
@@ -58,9 +58,11 @@ window.uploadVideo = async () => {
   const fileInput = document.getElementById("videoFile");
   const titleInput = document.getElementById("videoTitle");
   const playlist = document.getElementById("playlistSelect").value;
+  const restrictedCheckbox = document.getElementById("restrictedCheckbox");
 
   const file = fileInput.files[0];
   const title = titleInput.value.trim();
+  const isRestricted = restrictedCheckbox.checked;
 
   if (!file || !title || !playlist) {
     alert("Please complete all fields.");
@@ -95,12 +97,20 @@ window.uploadVideo = async () => {
       const data = snap.data();
       const videos = data.videos || [];
 
-      videos.push({ title, url, path: `videos/${uniqueName}` });
+      const newVideo = {
+        title,
+        url,
+        path: `videos/${uniqueName}`,
+        ...(isRestricted ? { restricted: true } : {}) // ✅ Add only if checked
+      };
+
+      videos.push(newVideo);
       await updateDoc(refDoc, { videos });
 
       alert("✅ Video uploaded!");
       fileInput.value = "";
       titleInput.value = "";
+      restrictedCheckbox.checked = false;
       refreshPlaylists();
     }
   );
